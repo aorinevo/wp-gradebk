@@ -1,10 +1,9 @@
-define(['backbone','models/StudentCourse'],
-function(Backbone,StudentCourse){ 
-	var StudentCourses = Backbone.Collection.extend({
-	model: StudentCourse,
-  	url: function(){
-  	     	return ajaxurl + '?action=get_student_courses';
-  		}
-	});
-	return StudentCourses;
-});
+(function($, Backbone, _, ANGradeBook) {
+    'use strict';
+    ANGradeBook.Collections.StudentCourseList = Backbone.Collection.extend({
+        model: ANGradeBook.Models.StudentCourse,
+        url: function() {
+            return anGradebookSettings.ajaxurl + '?action=get_student_courses';
+        }
+    });
+})(jQuery, Backbone, _, ANGradeBook);

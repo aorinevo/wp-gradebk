@@ -1,6 +1,6 @@
-define(['backbone','models/Cell'],function(Backbone,Cell){ 
-    var Cells = Backbone.Collection.extend({
-        model: Cell     
-    });   
-    return Cells;
-});
+(function($, Backbone, _, ANGradeBook) {
+    'use strict';
+    ANGradeBook.Collections.CellList = Backbone.Collection.extend({
+        model: ANGradeBook.Models.Cell
+    });
+})(jQuery, Backbone, _, ANGradeBook);

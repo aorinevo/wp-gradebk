@@ -1,104 +1,74 @@
 <?php
-class gradebook_course_API{
-	public function __construct(){
-		add_action('wp_ajax_course', array($this, 'course'));											
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+class gradebook_course_API {
+	public function __construct() {
+		add_action( 'wp_ajax_course', array( $this, 'course' ) );
 	}
-	
-/*********************************
-* Use the following template to extend api
-*
-*	public function name_of_api(){
-*		global $wpdb;
-*   	$wpdb->show_errors();  		
-*		if (!gradebook_check_user_role('administrator')){	
-*			echo json_encode(array("status" => "Not Allowed."));
-*			die();
-*		}   		
-*		switch ($_SERVER['REQUEST_METHOD']){
-*			case 'DELETE' :  
-*	  			echo json_encode(array('delete'=>'deleting'));
-*	  			break;
-*	  		case 'PUT' :
-*	  			echo json_encode(array('put'=>'putting'));
-*				break;
-*	  		case 'UPDATE' :
-*				echo json_encode(array("update" => "updating"));				
-*				break;
-*	  		case 'PATCH' :
-*				echo json_encode(array("patch" => "patching"));				
-*				break;
-*	  		case 'GET' :
-*				echo json_encode(array("get" => "getting"));	
-*				break;
-*	  		case 'POST' :				
-*				echo json_encode(array("post" => "posting"));		  		
-*				break;
-*	  	}
-*	  	die();
-*	}
-*********************************/
 
+	public function course() {
+		global $wpdb;
+		check_ajax_referer( 'an_gradebook_nonce', 'nonce' );
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( 'Not Allowed.', 403 );
+		}
 
-/*************************
-*
-*   course api
-*
-**************************/
+		$table_gradebooks  = an_gradebook_table( 'an_gradebooks' );
+		$table_gradebook   = an_gradebook_table( 'an_gradebook' );
+		$table_assignments = an_gradebook_table( 'an_assignments' );
+		$table_assignment  = an_gradebook_table( 'an_assignment' );
 
-	public function course(){
-  		global $wpdb;
-    	$wpdb->show_errors();  		
-		if (!gradebook_check_user_role('administrator')){	
-			echo json_encode(array("status" => "Not Allowed."));
-			die();
-		}   	
-		$method = (isset($_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'])) ? $_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'] : $_SERVER['REQUEST_METHOD'];
-		switch ($method){
-			case 'DELETE' : 
-				$id = $_REQUEST['id'];
-				$gbid = $id;		
-	  			$wpdb->delete('an_gradebooks',array('id'=>$id));
-	  			$wpdb->delete('an_gradebook',array('gbid'=>$gbid));  
-	  			$wpdb->delete('an_assignments',array('gbid'=>$gbid));
-	  			$wpdb->delete('an_assignment',array('gbid'=>$gbid));  
-	  			echo json_encode(array('delete_course'=>'Success'));
-	  			break;
-	  		case 'PUT' :
-				$params = json_decode(file_get_contents('php://input'),true);			
-   				$wpdb->update('an_gradebooks', array( 
-   					'name' => $params['name'], 'school' => $params['school'], 'semester' => $params['semester'], 
-   					'year' => $params['year']),
-					array('id' => $params['id'])
-				);   
-   				$courseDetails = $wpdb->get_row('SELECT * FROM an_gradebooks WHERE id = '. $params['id'] , ARRAY_A);
-   				echo json_encode($courseDetails);	
+		$method = isset( $_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'] ) ? sanitize_text_field( $_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'] ) : $_SERVER['REQUEST_METHOD'];
+		switch ( $method ) {
+			case 'DELETE':
+				$id   = absint( $_REQUEST['id'] );
+				$gbid = $id;
+				$wpdb->delete( $table_gradebooks, array( 'id' => $id ) );
+				$wpdb->delete( $table_gradebook, array( 'gbid' => $gbid ) );
+				$wpdb->delete( $table_assignments, array( 'gbid' => $gbid ) );
+				$wpdb->delete( $table_assignment, array( 'gbid' => $gbid ) );
+				wp_send_json( array( 'delete_course' => 'Success' ) );
 				break;
-	  		case 'UPDATE' :
-				echo json_encode(array("update" => "updating"));				
-				break;
-	  		case 'PATCH' :
-				echo json_encode(array("patch" => "patching"));				
-				break;
-	  		case 'GET' :
-				echo json_encode(array("get" => "getting"));	
-				break;
-	  		case 'POST' :
-				$params = json_decode(file_get_contents('php://input'),true);		  		
-    			$wpdb->insert('an_gradebooks', 
-		    		array('name' => $params['name'], 'school' => $params['school'], 'semester' => $params['semester'], 'year' => $params['year']), 
-					array('%s', '%s', '%s', '%d') 
+
+			case 'PUT':
+				$params = json_decode( file_get_contents( 'php://input' ), true );
+				$id     = absint( $params['id'] );
+				$wpdb->update(
+					$table_gradebooks,
+					array(
+						'name'     => sanitize_text_field( $params['name'] ),
+						'school'   => sanitize_text_field( $params['school'] ),
+						'semester' => sanitize_text_field( $params['semester'] ),
+						'year'     => absint( $params['year'] ),
+					),
+					array( 'id' => $id )
 				);
-				if( !is_wp_error($wpdb->insert_id) ){
-					$courseDetails = $wpdb->get_row("SELECT * FROM an_gradebooks WHERE id = $wpdb->insert_id", ARRAY_A);
-					echo json_encode($courseDetails);
-					die();
-				}else{
-					echo $result->get_error_message();
-					die();
-				}						
+				$courseDetails = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table_gradebooks} WHERE id = %d", $id ), ARRAY_A );
+				wp_send_json( $courseDetails );
 				break;
-	  	}
-	  	die();
+
+			case 'POST':
+				$params = json_decode( file_get_contents( 'php://input' ), true );
+				$wpdb->insert(
+					$table_gradebooks,
+					array(
+						'name'     => sanitize_text_field( $params['name'] ),
+						'school'   => sanitize_text_field( $params['school'] ),
+						'semester' => sanitize_text_field( $params['semester'] ),
+						'year'     => absint( $params['year'] ),
+					),
+					array( '%s', '%s', '%s', '%d' )
+				);
+				if ( $wpdb->insert_id ) {
+					$courseDetails = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table_gradebooks} WHERE id = %d", $wpdb->insert_id ), ARRAY_A );
+					wp_send_json( $courseDetails );
+				} else {
+					wp_send_json_error( 'Failed to create course.' );
+				}
+				break;
+		}
+		wp_die();
 	}
-}	
-?>
+}

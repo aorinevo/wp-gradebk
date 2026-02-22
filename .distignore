@@ -1,0 +1,10 @@
+/.git
+/.github
+/.wordpress-org
+
+.distignore
+.gitignore
+.gitattributes
+.editorconfig
+.DS_Store
+Thumbs.db
