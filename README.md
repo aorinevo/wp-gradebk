@@ -128,6 +128,56 @@ SELECT * FROM wp_an_assignment;
 
 The plugin uses `dbDelta()` to manage the schema. Table definitions live in `Gradebook-Database.php`. On activation and on every `plugins_loaded`, the plugin checks `an_gradebook_db_version` in `wp_options` and runs `dbDelta()` if the version is stale.
 
+#### Entity Relationship Diagram
+
+```mermaid
+erDiagram
+    wp_users {
+        int ID PK
+        varchar user_login
+        varchar first_name
+        varchar last_name
+    }
+    wp_an_gradebooks {
+        int id PK
+        text name
+        text school
+        text semester
+        int year
+    }
+    wp_an_gradebook {
+        int id PK
+        int uid FK
+        int gbid FK
+    }
+    wp_an_assignments {
+        int id PK
+        int gbid FK
+        int assign_order
+        text assign_name
+        text assign_category
+        varchar assign_visibility
+        date assign_date
+        date assign_due
+    }
+    wp_an_assignment {
+        int id PK
+        int uid FK
+        int gbid FK
+        int amid FK
+        int assign_order
+        float assign_points_earned
+    }
+    wp_users ||--o{ wp_an_gradebook : "enrolled in"
+    wp_an_gradebooks ||--o{ wp_an_gradebook : "has students"
+    wp_an_gradebooks ||--o{ wp_an_assignments : "has assignments"
+    wp_users ||--o{ wp_an_assignment : "has grades"
+    wp_an_gradebooks ||--o{ wp_an_assignment : "has grade cells"
+    wp_an_assignments ||--o{ wp_an_assignment : "graded per student"
+```
+
+`wp_an_gradebook` is the enrollment join table linking students to courses. `wp_an_assignment` is the grade cell table storing one row per student per assignment. Foreign keys are enforced at the application level, not the database level.
+
 ### AJAX Endpoints
 
 All write endpoints require `manage_options` capability (WordPress Administrator). Read endpoints for students require only `is_user_logged_in()`. Every endpoint verifies the `an_gradebook_nonce` nonce.
