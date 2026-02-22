@@ -29,8 +29,10 @@ require_once plugin_dir_path( __FILE__ ) . 'Gradebook-RESTful-API/Student.php';
 require_once plugin_dir_path( __FILE__ ) . 'Gradebook-RESTful-API/Cell.php';
 require_once plugin_dir_path( __FILE__ ) . 'Gradebook-RESTful-API/Gradebook-API.php';
 
+register_activation_hook( __FILE__, array( 'AN_GradeBook_Database', 'setup' ) );
+add_action( 'plugins_loaded', array( 'AN_GradeBook_Database', 'maybe_setup' ) );
+
 function an_gradebook_init() {
-	new AN_GradeBook_Database();
 	new gradebook_course_API();
 	new gradebook_assignment_API();
 	new gradebook_cell_API();
