@@ -9,13 +9,13 @@ set -euo pipefail
 VERSION="$1"
 
 # GradeBook.php — plugin header
-sed -i "s/^Version: .*/Version: ${VERSION}/" GradeBook.php
+perl -pi -e "s/^Version: .*/Version: ${VERSION}/" GradeBook.php
 
 # GradeBook.php — PHP constant
-sed -i "s/AN_GRADEBOOK_VERSION', '[^']*'/AN_GRADEBOOK_VERSION', '${VERSION}'/" GradeBook.php
+perl -pi -e "s/(AN_GRADEBOOK_VERSION', ')[^']*/${1}${VERSION}/" GradeBook.php
 
 # readme.txt — Stable tag
-sed -i "s/^Stable tag: .*/Stable tag: ${VERSION}/" readme.txt
+perl -pi -e "s/^Stable tag: .*/Stable tag: ${VERSION}/" readme.txt
 
 # package.json — version field
-sed -i "s/\"version\": \"[^\"]*\"/\"version\": \"${VERSION}\"/" package.json
+perl -pi -e "s/(\"version\": \")[^\"]*/${1}${VERSION}/" package.json
