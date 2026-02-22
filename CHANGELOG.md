@@ -1,3 +1,10 @@
+# [6.2.0](https://github.com/aorinevo/wp-gradebk/compare/6.1.0...6.2.0) (2026-02-22)
+
+
+### Features
+
+* **ci/cd:** manual deploy ([9bdbd34](https://github.com/aorinevo/wp-gradebk/commit/9bdbd34a430c92a6988ce945a7335d6a3f299c9e))
+
 # [6.1.0](https://github.com/aorinevo/wp-gradebk/compare/6.0.2...6.1.0) (2026-02-22)
 
 
