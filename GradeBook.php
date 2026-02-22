@@ -3,7 +3,7 @@
 Plugin Name: GradeBook
 Plugin URI: https://wordpress.org/plugins/an-gradebook/
 Description: A gradebook plugin for educators to create, maintain, and share grades.
-Version: 6.2.0
+Version: 6.3.0
 Author: Aori Nevo
 Author URI: http://www.aorinevo.com
 License: GPL-2.0-or-later
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'AN_GRADEBOOK_VERSION', '6.2.0' );
+define( 'AN_GRADEBOOK_VERSION', '6.3.0' );
 
 require_once plugin_dir_path( __FILE__ ) . 'functions.php';
 require_once plugin_dir_path( __FILE__ ) . 'Gradebook-Database.php';

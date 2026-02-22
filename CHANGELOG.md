@@ -1,3 +1,10 @@
+# [6.3.0](https://github.com/aorinevo/wp-gradebk/compare/6.2.0...6.3.0) (2026-02-22)
+
+
+### Features
+
+* **assets:** move assets to git version control ([a5c058b](https://github.com/aorinevo/wp-gradebk/commit/a5c058b8b2397bc51beaab4d1259eb4a4ee63784))
+
 # [6.2.0](https://github.com/aorinevo/wp-gradebk/compare/6.1.0...6.2.0) (2026-02-22)
 
 
