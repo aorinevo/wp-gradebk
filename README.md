@@ -62,6 +62,68 @@ The frontend is a single-page application built on **Backbone.js** using WordPre
 
 ## Development
 
+### Local Testing
+
+Build a plugin zip and upload it to your WordPress instance:
+
+```bash
+# From the repo root, create a zip excluding dev files
+cd .. && zip -r an-gradebook.zip wp-gradebk \
+  -x "wp-gradebk/.git/*" \
+  -x "wp-gradebk/.github/*" \
+  -x "wp-gradebk/.wordpress-org/*" \
+  -x "wp-gradebk/.distignore" \
+  -x "wp-gradebk/.gitignore" \
+  -x "wp-gradebk/.gitattributes" \
+  -x "wp-gradebk/.editorconfig" \
+  -x "wp-gradebk/.DS_Store" \
+  -x "wp-gradebk/node_modules/*" \
+  -x "wp-gradebk/README.md"
+```
+
+Then in WordPress:
+
+1. Go to **Plugins > Add New Plugin > Upload Plugin**
+2. Choose the `an-gradebook.zip` file and click **Install Now**
+3. Activate the plugin
+
+To update an existing install, deactivate the current version first, delete it, then upload the new zip.
+
+### Connecting to phpMyAdmin (Lightsail)
+
+phpMyAdmin is only accessible from localhost on Bitnami/Lightsail stacks. Use an SSH tunnel:
+
+```bash
+# Download your SSH key from Lightsail console > Account > SSH keys
+# Move it to ~/.ssh/ and lock down permissions
+mv ~/Downloads/LightsailDefaultKey-<region>.pem ~/.ssh/
+chmod 400 ~/.ssh/LightsailDefaultKey-<region>.pem
+
+# Open the tunnel
+ssh -N -L 8888:127.0.0.1:80 -i ~/.ssh/LightsailDefaultKey-<region>.pem bitnami@<INSTANCE_IP>
+```
+
+Then open `http://127.0.0.1:8888/phpmyadmin` in your browser.
+
+- **Username:** `root`
+- **Password:** Run `cat /home/bitnami/bitnami_credentials` on the instance
+
+Useful queries for debugging:
+
+```sql
+-- Check plugin DB version
+SELECT option_value FROM wp_options WHERE option_name = 'an_gradebook_db_version';
+
+-- Verify tables exist
+SHOW TABLES LIKE '%an_%';
+
+-- Inspect data
+SELECT * FROM wp_an_gradebooks;
+SELECT * FROM wp_an_gradebook;
+SELECT * FROM wp_an_assignments;
+SELECT * FROM wp_an_assignment;
+```
+
 ### Database
 
 The plugin uses `dbDelta()` to manage the schema. Table definitions live in `Gradebook-Database.php`. On activation and on every `plugins_loaded`, the plugin checks `an_gradebook_db_version` in `wp_options` and runs `dbDelta()` if the version is stale.

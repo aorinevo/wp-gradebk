@@ -1,0 +1,12 @@
+{
+  "name": "an-gradebook",
+  "version": "6.0.2",
+  "private": true,
+  "description": "A gradebook plugin for educators to create, maintain, and share grades.",
+  "devDependencies": {
+    "semantic-release": "^24.0.0",
+    "@semantic-release/changelog": "^6.0.0",
+    "@semantic-release/exec": "^6.0.0",
+    "@semantic-release/git": "^10.0.0"
+  }
+}

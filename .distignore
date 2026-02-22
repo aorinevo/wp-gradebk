@@ -12,6 +12,11 @@ Thumbs.db
 node_modules
 package.json
 package-lock.json
+.releaserc.json
+CHANGELOG.md
+README.md
+scripts
+
 Gruntfile.js
 docker-compose.yml
 config.json

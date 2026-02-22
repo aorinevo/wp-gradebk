@@ -3,7 +3,7 @@ Contributors: anevo
 Tags: gradebook, course management, education, grades, students
 Requires at least: 6.0
 Tested up to: 6.9
-Stable tag: 6.0.0
+Stable tag: 6.0.2
 Requires PHP: 7.4
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -139,8 +139,11 @@ Students log in to WordPress and navigate to the GradeBook menu item. They will 
 
 == Upgrade Notice ==
 
+= 6.0.0 =
+Breaking change: Legacy database migrations have been removed. If upgrading from a version older than 4.0.0, deactivate the plugin, delete the `an_gradebook_db_version` row from `wp_options`, then reactivate. This performs a fresh database setup. Existing data in pre-4.0 unprefixed tables will not be migrated automatically.
+
 = 4.0.0 =
-Major compatibility update. Existing database tables will be automatically migrated to use WordPress table prefixes. All AJAX endpoints are now secured with nonces. Requires WordPress 6.0+ and PHP 7.4+.
+Major compatibility update. Database tables now use WordPress table prefixes. All AJAX endpoints are secured with nonces. Requires WordPress 6.0+ and PHP 7.4+.
 
 == Credits ==
 
