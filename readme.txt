@@ -65,12 +65,14 @@ Students log in to WordPress and navigate to the GradeBook menu item. They will 
 
 = 6.2.0 =
 * manual deploy
+
 = 6.1.0 =
 * escape perl capture group refs in bump-version.sh
 * replace sed with perl in update-readme-changelog.sh
 * sed command json parsing issue
 * sed command json parsing issue
 * add semantic-release
+
 = 4.0.0 =
 * Compatibility update for WordPress 6.0+ and PHP 7.4–8.3.
 * Security: Added nonce verification to all AJAX endpoints.
