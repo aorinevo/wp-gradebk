@@ -1,5 +1,6 @@
-define(['backbone'],function(Backbone){ 
-	var Course = Backbone.Model.extend({
+(function($, Backbone, _, ANGradeBook) {
+    'use strict';
+    ANGradeBook.Models.Course = Backbone.Model.extend({
         defaults: {
             name: 'Calculus I',
             school: 'Bergen',
@@ -7,16 +8,15 @@ define(['backbone'],function(Backbone){
             year: '2014',
             selected: false
         },
-        url: function(){        	
-        	if(this.get('id')){
-        		return ajaxurl + '?action=course&id='+this.get('id');
-        	} else{
-        		return ajaxurl + '?action=course';
-        	}
+        url: function() {
+            if (this.get('id')) {
+                return anGradebookSettings.ajaxurl + '?action=course&id=' + this.get('id');
+            } else {
+                return anGradebookSettings.ajaxurl + '?action=course';
+            }
         },
-        export2csv: function(){
-        	window.location.assign(ajaxurl + '?action=get_csv&id='+this.get('id'));
+        export2csv: function() {
+            window.location.assign(anGradebookSettings.ajaxurl + '?action=get_csv&id=' + this.get('id') + '&nonce=' + anGradebookSettings.nonce);
         }
-	});
-	return Course;
-});
+    });
+})(jQuery, Backbone, _, ANGradeBook);

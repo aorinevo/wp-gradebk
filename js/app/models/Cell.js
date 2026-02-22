@@ -1,5 +1,6 @@
-define(['backbone'],function(Backbone){ 
-	var Cell = Backbone.Model.extend({
+(function($, Backbone, _, ANGradeBook) {
+    'use strict';
+    ANGradeBook.Models.Cell = Backbone.Model.extend({
         defaults: {
             uid: null,
             gbid: null,
@@ -11,13 +12,12 @@ define(['backbone'],function(Backbone){
             visibility: true,
             display: false
         },
-        url: function(){
-        	if(this.get('id')){
-        		return ajaxurl + '?action=cell&id='+this.get('id');
-        	} else {
-        		return ajaxurl + '?action=cell';
-        	}
+        url: function() {
+            if (this.get('id')) {
+                return anGradebookSettings.ajaxurl + '?action=cell&id=' + this.get('id');
+            } else {
+                return anGradebookSettings.ajaxurl + '?action=cell';
+            }
         }
     });
-    return Cell;
-});
+})(jQuery, Backbone, _, ANGradeBook);

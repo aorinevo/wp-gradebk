@@ -2,108 +2,183 @@
 /*
 Plugin Name: GradeBook
 Plugin URI: http://www.aorinevo.com/
-Description: A simple GradeBook plugin
-Version: 3.5.7
+Description: A gradebook plugin for educators to create, maintain, and share grades.
+Version: 4.0.0
 Author: Aori Nevo
 Author URI: http://www.aorinevo.com
-License: GPL
+License: GPL-2.0-or-later
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
+Text Domain: an-gradebook
+Domain Path: /languages
+Requires at least: 6.0
+Tested up to: 6.9
+Requires PHP: 7.4
 */
 
-define( "AN_GRADEBOOK_VERSION", "3.5.7");
-
-include_once( dirname( __FILE__ ) . '/functions.php' );
-include_once( dirname( __FILE__ ) . '/Gradebook-Database.php' );
-include_once( dirname( __FILE__ ) . '/Gradebook-RESTful-API/Assignment.php' );
-include_once( dirname( __FILE__ ) . '/Gradebook-RESTful-API/Course.php' );
-include_once( dirname( __FILE__ ) . '/Gradebook-RESTful-API/Student.php' );
-include_once( dirname( __FILE__ ) . '/Gradebook-RESTful-API/Cell.php' );
-include_once( dirname( __FILE__ ) . '/Gradebook-RESTful-API/Gradebook-API.php' );
-
-$an_gradebook_database = new AN_GradeBook_Database();
-$an_gradebook_course_api = new gradebook_course_API();
-$an_gradebook_assignment_api = new gradebook_assignment_API();
-$an_gradebook_cell_api = new gradebook_cell_API();
-$an_gradebook_student_api = new gradebook_student_API();
-$an_gradebookapi = new AN_GradeBookAPI();
-
-function register_an_gradebook_menu_page(){	
-	if(gradebook_check_user_role('administrator')){		
-		add_menu_page( 'an_gradebook', 'GradeBook', 'administrator', 'an_gradebook', 'init_an_gradebook', 'dashicons-book-alt', '6.12' ); 		
-	} else {
-		add_menu_page( 'an_gradebook', 'GradeBook', 'subscriber', 'an_gradebook', 'init_an_gradebook', 'dashicons-book-alt', '6.12' ); 			
-	}
-} 	
-add_action( 'admin_menu', 'register_an_gradebook_menu_page' );	
-	
-function enqueue_an_gradebook_scripts($hook){	
-	$an_gradebook_develop = false;
-	$app_base = plugins_url('js',__FILE__);
-	wp_register_style( 'jquery_ui_css', $app_base.'/lib/jquery-ui/jquery-ui.css', array(), null, false );	
-	wp_register_style( 'GradeBook_css', plugins_url('GradeBook.css',__File__), array('bootstrap_css','jquery_ui_css'), null, false );				
-	wp_register_style( 'bootstrap_css', $app_base.'/lib/bootstrap/css/bootstrap2.css', array(), null, false);	
-	wp_register_script( 'requirejs', $app_base.'/require.js', array(), null, true);					
-	if( $hook == "toplevel_page_an_gradebook" ){					
-		wp_enqueue_style('GradeBook_css');					
-		wp_enqueue_script('requirejs');		
-		if(gradebook_check_user_role('administrator')){			
-			wp_localize_script( 'requirejs', 'require', array(
-				'baseUrl' => $app_base,				
-				'deps'    => array( $app_base . ($an_gradebook_develop ? '/app_instructor.js' : '/app-instructor-min.js')
-				)
-			));
-		} else {
-			wp_localize_script( 'requirejs', 'require', array(
-				'baseUrl' => $app_base,
-				'deps'    => array( $app_base . ($an_gradebook_develop ? '/app_student.js' : '/app-student-min.js')
-				)
-			));		
-		}
-	} else {
-		return;
-	}						
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
 }
-add_action( 'admin_enqueue_scripts', 'enqueue_an_gradebook_scripts');
-	
-	function init_an_gradebook(){
-		if (gradebook_check_user_role('administrator')){
-			ob_start();	
-			include( dirname( __FILE__ ) . '/templates/edit-student-template.php' );	
-			include( dirname( __FILE__ ) . '/templates/delete-student-template.php' );
-			include( dirname( __FILE__ ) . '/templates/edit-assignment-template.php' );
-			include( dirname( __FILE__ ) . '/templates/stats-assignment-template.php' );
-			include( dirname( __FILE__ ) . '/templates/edit-cell-template.php' );				
-			include( dirname( __FILE__ ) . '/templates/stats-student-template.php' );	
-			include( dirname( __FILE__ ) . '/templates/assignment-view-template.php' );		
-			include( dirname( __FILE__ ) . '/templates/course-view-template.php' );			
-			include( dirname( __FILE__ ) . '/templates/student-view-template.php' );		
-			include( dirname( __FILE__ ) . '/templates/gradebook-interface-template.php' );
-			include( dirname( __FILE__ ) . '/templates/student-courses-interface-template.php' );
-			include( dirname( __FILE__ ) . '/templates/edit-course-template.php' );
-			include( dirname( __FILE__ ) . '/templates/courses-interface-template.php' );	
-			include( dirname( __FILE__ ) . '/templates/student-gradebook-interface-template.php' );	
-			echo ob_get_clean();	
-		} elseif (get_current_user_id()>0 && !gradebook_check_user_role('administrator')){
-			ob_start();
-			include( dirname( __FILE__ ) . '/templates/stats-assignment-template.php' );	
-			include( dirname( __FILE__ ) . '/templates/stats-student-template.php' );
-			include( dirname( __FILE__ ) . '/templates/student-student-view-template.php' );
-			include( dirname( __FILE__ ) . '/templates/student-course-view-template.php' );	
-			include( dirname( __FILE__ ) . '/templates/student-cell-template.php' );									
-			include( dirname( __FILE__ ) . '/templates/student-assignment-view-template.php' );
-			include( dirname( __FILE__ ) . '/templates/student-details-assignment-template.php' );									
-			include( dirname( __FILE__ ) . '/templates/student-courses-interface-template.php' );
-			include( dirname( __FILE__ ) . '/templates/student-gradebook-interface-template.php' );
-			echo ob_get_clean();	
-		} else {	
-			echo 'You do not have premissions to view this GradeBook.';
-		}
-	}	
+
+define( 'AN_GRADEBOOK_VERSION', '4.0.0' );
+
+require_once plugin_dir_path( __FILE__ ) . 'functions.php';
+require_once plugin_dir_path( __FILE__ ) . 'Gradebook-Database.php';
+require_once plugin_dir_path( __FILE__ ) . 'Gradebook-RESTful-API/Assignment.php';
+require_once plugin_dir_path( __FILE__ ) . 'Gradebook-RESTful-API/Course.php';
+require_once plugin_dir_path( __FILE__ ) . 'Gradebook-RESTful-API/Student.php';
+require_once plugin_dir_path( __FILE__ ) . 'Gradebook-RESTful-API/Cell.php';
+require_once plugin_dir_path( __FILE__ ) . 'Gradebook-RESTful-API/Gradebook-API.php';
+
+function an_gradebook_init() {
+	new AN_GradeBook_Database();
+	new gradebook_course_API();
+	new gradebook_assignment_API();
+	new gradebook_cell_API();
+	new gradebook_student_API();
+	new AN_GradeBookAPI();
+}
+add_action( 'init', 'an_gradebook_init' );
+
+function an_gradebook_load_textdomain() {
+	load_plugin_textdomain( 'an-gradebook', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
+}
+add_action( 'plugins_loaded', 'an_gradebook_load_textdomain' );
+
+function register_an_gradebook_menu_page() {
+	add_menu_page(
+		__( 'GradeBook', 'an-gradebook' ),
+		__( 'GradeBook', 'an-gradebook' ),
+		'read',
+		'an_gradebook',
+		'init_an_gradebook',
+		'dashicons-book-alt',
+		'6.12'
+	);
+}
+add_action( 'admin_menu', 'register_an_gradebook_menu_page' );
+
+function enqueue_an_gradebook_scripts( $hook ) {
+	if ( 'toplevel_page_an_gradebook' !== $hook ) {
+		return;
+	}
+
+	$plugin_url = plugins_url( '', __FILE__ );
+	$js_url     = $plugin_url . '/js';
+	$version    = AN_GRADEBOOK_VERSION;
+
+	// Styles
+	wp_enqueue_style( 'an-gradebook-jquery-ui', $js_url . '/lib/jquery-ui/jquery-ui.css', array(), $version );
+	wp_enqueue_style( 'an-gradebook-bootstrap', $js_url . '/lib/bootstrap/css/bootstrap2.css', array(), $version );
+	wp_enqueue_style( 'an-gradebook', $plugin_url . '/GradeBook.css', array( 'an-gradebook-bootstrap', 'an-gradebook-jquery-ui' ), $version );
+
+	// Google Charts
+	wp_enqueue_script( 'google-charts', 'https://www.gstatic.com/charts/loader.js', array(), null, true );
+
+	// Bootstrap JS (not bundled by WordPress)
+	wp_enqueue_script( 'an-gradebook-bootstrap', $js_url . '/lib/bootstrap/js/bootstrap.js', array( 'jquery' ), $version, true );
+
+	// Plugin namespace (depends on WordPress-bundled jQuery, Backbone, Underscore)
+	wp_enqueue_script( 'an-gradebook-namespace', $js_url . '/an-gradebook-namespace.js', array( 'jquery', 'backbone', 'underscore' ), $version, true );
+
+	// Pass nonce and ajax URL to JavaScript
+	wp_localize_script( 'an-gradebook-namespace', 'anGradebookSettings', array(
+		'ajaxurl' => admin_url( 'admin-ajax.php' ),
+		'nonce'   => wp_create_nonce( 'an_gradebook_nonce' ),
+	) );
+
+	// Models (base models first, then collections that depend on them)
+	$models = array(
+		'Course', 'CourseList',
+		'Assignment', 'AssignmentList',
+		'Student', 'StudentList',
+		'Cell', 'CellList',
+		'CourseGradebook',
+		'StudentCourse', 'StudentCourseList',
+		'StudentCourseGradebook',
+	);
+	foreach ( $models as $model ) {
+		$handle = 'an-gradebook-model-' . strtolower( $model );
+		wp_enqueue_script( $handle, $js_url . "/app/models/{$model}.js", array( 'an-gradebook-namespace' ), $version, true );
+	}
+
+	// Views — leaf views first, then composites
+	$views = array(
+		'EditCourseView',
+		'CourseView',
+		'DeleteStudentView',
+		'EditStudentView',
+		'EditAssignmentView',
+		'StatisticsView',
+		'AssignmentStatisticsView',
+		'StudentDetailsAssignmentView',
+		'CellView',
+		'StudentCellView',
+		'StudentView',
+		'StudentStudentView',
+		'AssignmentView',
+		'StudentAssignmentView',
+		'GradebookView',
+		'StudentGradebookView',
+		'StudentCourseView',
+	);
+	foreach ( $views as $view ) {
+		$handle = 'an-gradebook-view-' . strtolower( $view );
+		wp_enqueue_script( $handle, $js_url . "/app/views/{$view}.js", array( 'an-gradebook-namespace', 'google-charts' ), $version, true );
+	}
+
+	// Main app views
+	wp_enqueue_script( 'an-gradebook-app-instructor', $js_url . '/app/GradeBook.js', array( 'an-gradebook-namespace' ), $version, true );
+	wp_enqueue_script( 'an-gradebook-app-student', $js_url . '/app/GradeBook_student.js', array( 'an-gradebook-namespace' ), $version, true );
+
+	// Entry point (instructor or student)
+	if ( current_user_can( 'manage_options' ) ) {
+		wp_enqueue_script( 'an-gradebook-instructor', $js_url . '/an-gradebook-instructor.js', array( 'an-gradebook-app-instructor' ), $version, true );
+	} else {
+		wp_enqueue_script( 'an-gradebook-student', $js_url . '/an-gradebook-student.js', array( 'an-gradebook-app-student' ), $version, true );
+	}
+}
+add_action( 'admin_enqueue_scripts', 'enqueue_an_gradebook_scripts' );
+
+function init_an_gradebook() {
+	if ( current_user_can( 'manage_options' ) ) {
+		ob_start();
+		include plugin_dir_path( __FILE__ ) . 'templates/edit-student-template.php';
+		include plugin_dir_path( __FILE__ ) . 'templates/delete-student-template.php';
+		include plugin_dir_path( __FILE__ ) . 'templates/edit-assignment-template.php';
+		include plugin_dir_path( __FILE__ ) . 'templates/stats-assignment-template.php';
+		include plugin_dir_path( __FILE__ ) . 'templates/edit-cell-template.php';
+		include plugin_dir_path( __FILE__ ) . 'templates/stats-student-template.php';
+		include plugin_dir_path( __FILE__ ) . 'templates/assignment-view-template.php';
+		include plugin_dir_path( __FILE__ ) . 'templates/course-view-template.php';
+		include plugin_dir_path( __FILE__ ) . 'templates/student-view-template.php';
+		include plugin_dir_path( __FILE__ ) . 'templates/gradebook-interface-template.php';
+		include plugin_dir_path( __FILE__ ) . 'templates/student-courses-interface-template.php';
+		include plugin_dir_path( __FILE__ ) . 'templates/edit-course-template.php';
+		include plugin_dir_path( __FILE__ ) . 'templates/courses-interface-template.php';
+		include plugin_dir_path( __FILE__ ) . 'templates/student-gradebook-interface-template.php';
+		echo ob_get_clean();
+	} elseif ( is_user_logged_in() ) {
+		ob_start();
+		include plugin_dir_path( __FILE__ ) . 'templates/stats-assignment-template.php';
+		include plugin_dir_path( __FILE__ ) . 'templates/stats-student-template.php';
+		include plugin_dir_path( __FILE__ ) . 'templates/student-student-view-template.php';
+		include plugin_dir_path( __FILE__ ) . 'templates/student-course-view-template.php';
+		include plugin_dir_path( __FILE__ ) . 'templates/student-cell-template.php';
+		include plugin_dir_path( __FILE__ ) . 'templates/student-assignment-view-template.php';
+		include plugin_dir_path( __FILE__ ) . 'templates/student-details-assignment-template.php';
+		include plugin_dir_path( __FILE__ ) . 'templates/student-courses-interface-template.php';
+		include plugin_dir_path( __FILE__ ) . 'templates/student-gradebook-interface-template.php';
+		echo ob_get_clean();
+	} else {
+		echo esc_html__( 'You do not have permissions to view this GradeBook.', 'an-gradebook' );
+	}
+}
 
 function an_gradebook_my_delete_user( $user_id ) {
 	global $wpdb;
-	$results1 = $wpdb->delete('an_gradebook',array('uid'=>$user_id));
-	$results2 = $wpdb->delete('an_assignment',array('uid'=>$user_id));
+	$table_gradebook  = an_gradebook_table( 'an_gradebook' );
+	$table_assignment = an_gradebook_table( 'an_assignment' );
+	$wpdb->delete( $table_gradebook, array( 'uid' => $user_id ) );
+	$wpdb->delete( $table_assignment, array( 'uid' => $user_id ) );
 }
 add_action( 'delete_user', 'an_gradebook_my_delete_user' );
-
-?>

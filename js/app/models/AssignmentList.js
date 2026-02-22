@@ -1,6 +1,6 @@
-define(['backbone','models/Assignment'],function(Backbone,Assignment){ 
-	var Assignments = Backbone.Collection.extend({
-        model: Assignment
+(function($, Backbone, _, ANGradeBook) {
+    'use strict';
+    ANGradeBook.Collections.AssignmentList = Backbone.Collection.extend({
+        model: ANGradeBook.Models.Assignment
     });
-    return Assignments;
-});
+})(jQuery, Backbone, _, ANGradeBook);
