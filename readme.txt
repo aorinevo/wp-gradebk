@@ -3,7 +3,7 @@ Contributors: anevo
 Tags: gradebook, course management, education, grades, students
 Requires at least: 6.0
 Tested up to: 6.9
-Stable tag: 6.0.2
+Stable tag: 6.1.0
 Requires PHP: 7.4
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -63,6 +63,12 @@ Students log in to WordPress and navigate to the GradeBook menu item. They will 
 
 == Changelog ==
 
+= 6.1.0 =
+* escape perl capture group refs in bump-version.sh
+* replace sed with perl in update-readme-changelog.sh
+* sed command json parsing issue
+* sed command json parsing issue
+* add semantic-release
 = 4.0.0 =
 * Compatibility update for WordPress 6.0+ and PHP 7.4–8.3.
 * Security: Added nonce verification to all AJAX endpoints.
