@@ -6,6 +6,9 @@ on:
       - '*'
       - '!*-*'
 
+permissions:
+  contents: write
+
 jobs:
   deploy:
     name: Deploy to WordPress.org
