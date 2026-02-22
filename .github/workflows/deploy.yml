@@ -13,6 +13,38 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Remove legacy SVN artifacts
+        env:
+          SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+          SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+        run: |
+          SVN_URL="https://plugins.svn.wordpress.org/an-gradebook/trunk"
+
+          # Check if node_modules exists in SVN trunk
+          if svn ls "${SVN_URL}/node_modules" \
+            --username "$SVN_USERNAME" --password "$SVN_PASSWORD" \
+            --non-interactive --no-auth-cache &>/dev/null; then
+
+            echo "Removing legacy artifacts from SVN..."
+            ARTIFACTS_TO_REMOVE=""
+            for path in node_modules Gruntfile.js jsdoc.js docker-compose.yml config.json CONTRIBUTING.md readme.md package.json index.php; do
+              if svn ls "${SVN_URL}/${path}" \
+                --username "$SVN_USERNAME" --password "$SVN_PASSWORD" \
+                --non-interactive --no-auth-cache &>/dev/null; then
+                ARTIFACTS_TO_REMOVE="${ARTIFACTS_TO_REMOVE} ${SVN_URL}/${path}"
+              fi
+            done
+
+            if [ -n "$ARTIFACTS_TO_REMOVE" ]; then
+              svn rm $ARTIFACTS_TO_REMOVE \
+                -m "Remove legacy development artifacts from plugin distribution" \
+                --username "$SVN_USERNAME" --password "$SVN_PASSWORD" \
+                --non-interactive --no-auth-cache
+            fi
+          else
+            echo "No legacy artifacts found in SVN, skipping cleanup."
+          fi
+
       - name: WordPress Plugin Deploy
         id: deploy
         uses: 10up/action-wordpress-plugin-deploy@stable
