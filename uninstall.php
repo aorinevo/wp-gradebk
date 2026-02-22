@@ -8,8 +8,6 @@ global $wpdb;
 $tables = array( 'an_gradebooks', 'an_gradebook', 'an_assignments', 'an_assignment' );
 foreach ( $tables as $table ) {
 	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}{$table}" );
-	// Also drop unprefixed tables from older versions.
-	$wpdb->query( "DROP TABLE IF EXISTS {$table}" );
 }
 
 $wpdb->query(
