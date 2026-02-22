@@ -39,6 +39,6 @@ ${wp_entry}"
 # Insert after "== Changelog ==" line in readme.txt
 perl -i -pe "
   if (/^== Changelog ==\$/) {
-    \$_ .= \"\\n${new_block}\";
+    \$_ .= \"\\n${new_block}\\n\";
   }
 " "$README"
