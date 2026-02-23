@@ -1,0 +1,15 @@
+export const SET_COURSES = 'SET_COURSES' as const;
+export const ADD_COURSE = 'ADD_COURSE' as const;
+export const UPDATE_COURSE = 'UPDATE_COURSE' as const;
+export const REMOVE_COURSE = 'REMOVE_COURSE' as const;
+export const SELECT_COURSE = 'SELECT_COURSE' as const;
+export const SET_GRADEBOOK = 'SET_GRADEBOOK' as const;
+export const SET_LOADING = 'SET_LOADING' as const;
+export const SET_ERROR = 'SET_ERROR' as const;
+export const ADD_STUDENT = 'ADD_STUDENT' as const;
+export const UPDATE_STUDENT = 'UPDATE_STUDENT' as const;
+export const REMOVE_STUDENT = 'REMOVE_STUDENT' as const;
+export const ADD_ASSIGNMENT = 'ADD_ASSIGNMENT' as const;
+export const UPDATE_ASSIGNMENT = 'UPDATE_ASSIGNMENT' as const;
+export const REMOVE_ASSIGNMENT = 'REMOVE_ASSIGNMENT' as const;
+export const UPDATE_CELL = 'UPDATE_CELL' as const;

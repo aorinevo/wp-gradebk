@@ -6,6 +6,10 @@
   "scripts": {
     "build": "wp-scripts build",
     "start": "wp-scripts start",
+    "lint": "wp-scripts lint-js src/",
+    "lint:fix": "wp-scripts lint-js src/ --fix",
+    "format": "wp-scripts format src/",
+    "typecheck": "tsc --noEmit",
     "env:start": "wp-env start",
     "env:stop": "wp-env stop",
     "env:destroy": "wp-env destroy",
@@ -20,8 +24,11 @@
     "@semantic-release/changelog": "^6.0.0",
     "@semantic-release/exec": "^6.0.0",
     "@semantic-release/git": "^10.0.0",
+    "@types/wordpress__api-fetch": "^3.2.4",
+    "@types/wordpress__element": "^2.4.1",
     "@wordpress/env": "^10.39.0",
     "@wordpress/scripts": "^30.0.0",
-    "semantic-release": "^24.0.0"
+    "semantic-release": "^24.0.0",
+    "typescript": "^5.9.3"
   }
 }
