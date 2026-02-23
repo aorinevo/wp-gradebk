@@ -1,3 +1,10 @@
+## [6.4.1](https://github.com/aorinevo/wp-gradebk/compare/6.4.0...6.4.1) (2026-02-23)
+
+
+### Bug Fixes
+
+* **vuls:** address security vuls ([38cc410](https://github.com/aorinevo/wp-gradebk/commit/38cc4108f3f90aaf2f0a9caf2ba5a351719cdb28))
+
 # [6.4.0](https://github.com/aorinevo/wp-gradebk/compare/6.3.0...6.4.0) (2026-02-23)
 
 

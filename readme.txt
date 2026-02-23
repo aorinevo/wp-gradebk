@@ -3,7 +3,7 @@ Contributors: anevo
 Tags: gradebook, course management, education, grades, students
 Requires at least: 6.0
 Tested up to: 6.9
-Stable tag: 6.4.0
+Stable tag: 6.4.1
 Requires PHP: 7.4
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -62,6 +62,9 @@ Students log in to WordPress and navigate to the GradeBook menu item. They will 
 7. Student view of assignment details.
 
 == Changelog ==
+
+= 6.4.1 =
+* address security vuls
 
 = 6.4.0 =
 * replace backbonejs with react
