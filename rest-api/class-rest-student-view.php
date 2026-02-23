@@ -58,9 +58,21 @@ class AN_GradeBook_REST_Student_View {
 		global $wpdb;
 		$table_assignments = an_gradebook_table( 'an_assignments' );
 		$table_assignment  = an_gradebook_table( 'an_assignment' );
+		$table_gradebook   = an_gradebook_table( 'an_gradebook' );
 
 		$gbid         = absint( $request['id'] );
 		$current_user = wp_get_current_user();
+
+		// Verify student is enrolled in this course.
+		$enrolled = $wpdb->get_var( $wpdb->prepare(
+			"SELECT COUNT(*) FROM {$table_gradebook} WHERE uid = %d AND gbid = %d",
+			$current_user->ID,
+			$gbid
+		) );
+
+		if ( ! $enrolled ) {
+			return new WP_Error( 'forbidden', 'You are not enrolled in this course.', array( 'status' => 403 ) );
+		}
 
 		// Only visible assignments
 		$assignments = $wpdb->get_results( $wpdb->prepare(
@@ -133,9 +145,21 @@ class AN_GradeBook_REST_Student_View {
 		global $wpdb;
 		$table_assignment  = an_gradebook_table( 'an_assignment' );
 		$table_assignments = an_gradebook_table( 'an_assignments' );
+		$table_gradebook   = an_gradebook_table( 'an_gradebook' );
 
 		$uid  = get_current_user_id();
 		$gbid = absint( $request['gbid'] );
+
+		// Verify student is enrolled in this course.
+		$enrolled = $wpdb->get_var( $wpdb->prepare(
+			"SELECT COUNT(*) FROM {$table_gradebook} WHERE uid = %d AND gbid = %d",
+			$uid,
+			$gbid
+		) );
+
+		if ( ! $enrolled ) {
+			return new WP_Error( 'forbidden', 'You are not enrolled in this course.', array( 'status' => 403 ) );
+		}
 
 		// Only visible assignments
 		$assignments = $wpdb->get_results( $wpdb->prepare(
