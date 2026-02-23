@@ -190,17 +190,24 @@ class AN_GradeBook_REST_Courses {
 			$student_records[] = array_merge( $base, $scores );
 		}
 
-		$filename = str_replace( ' ', '_', $gradebook['name'] . '_' . $gbid );
+		$filename = sanitize_file_name( $gradebook['name'] . '_' . $gbid );
 
 		header( 'Content-Type: text/csv; charset=utf-8' );
-		header( 'Content-Disposition: attachment; filename=' . $filename . '.csv' );
+		header( 'Content-Disposition: attachment; filename="' . $filename . '.csv"' );
 
 		$output = fopen( 'php://output', 'w' );
-		fputcsv( $output, $column_headers );
+		fputcsv( $output, array_map( array( $this, 'sanitize_csv_value' ), $column_headers ) );
 		foreach ( $student_records as $row ) {
-			fputcsv( $output, $row );
+			fputcsv( $output, array_map( array( $this, 'sanitize_csv_value' ), $row ) );
 		}
 		fclose( $output );
 		exit;
+	}
+
+	private function sanitize_csv_value( $value ) {
+		if ( is_string( $value ) && isset( $value[0] ) && in_array( $value[0], array( '=', '+', '-', '@', "\t", "\r" ), true ) ) {
+			return "'" . $value;
+		}
+		return $value;
 	}
 }

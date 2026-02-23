@@ -56,7 +56,7 @@ class AN_GradeBook_REST_Students {
 					'amid'         => $assignment['id'],
 					'uid'          => $studentDetails->ID,
 					'assign_order' => $assignment['assign_order'],
-				) );
+				), array( '%d', '%d', '%d', '%d' ) );
 			}
 
 			$anGradebook = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table_gradebook} WHERE id = %d", $enrollmentId ), ARRAY_A );
@@ -108,7 +108,9 @@ class AN_GradeBook_REST_Students {
 		$wpdb->update(
 			$wpdb->users,
 			array( 'user_login' => $user_login . $result ),
-			array( 'ID' => $result )
+			array( 'ID' => $result ),
+			array( '%s' ),
+			array( '%d' )
 		);
 
 		$assignmentDetails = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table_assignments} WHERE gbid = %d", $gbid ), ARRAY_A );
@@ -118,11 +120,11 @@ class AN_GradeBook_REST_Students {
 				'amid'         => $assignment['id'],
 				'uid'          => $result,
 				'assign_order' => $assignment['assign_order'],
-			) );
+			), array( '%d', '%d', '%d', '%d' ) );
 		}
 
 		$studentDetails = get_user_by( 'id', $result );
-		$wpdb->insert( $table_gradebook, array( 'uid' => $studentDetails->ID, 'gbid' => $gbid ) );
+		$wpdb->insert( $table_gradebook, array( 'uid' => $studentDetails->ID, 'gbid' => $gbid ), array( '%d', '%d' ) );
 
 		$assignments = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table_assignment} WHERE uid = %d", $result ), ARRAY_A );
 		$anGradebook = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table_gradebook} WHERE id = %d", $wpdb->insert_id ), ARRAY_A );

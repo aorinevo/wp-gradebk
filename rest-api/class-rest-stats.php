@@ -29,9 +29,36 @@ class AN_GradeBook_REST_Stats {
 
 	public function get_pie_chart( $request ) {
 		global $wpdb;
-		$table_assignment = an_gradebook_table( 'an_assignment' );
+		$table_assignment  = an_gradebook_table( 'an_assignment' );
+		$table_assignments = an_gradebook_table( 'an_assignments' );
+		$table_gradebook   = an_gradebook_table( 'an_gradebook' );
 
-		$amid           = absint( $request['amid'] );
+		$amid = absint( $request['amid'] );
+
+		// Look up which course this assignment belongs to.
+		$gbid = $wpdb->get_var( $wpdb->prepare(
+			"SELECT gbid FROM {$table_assignments} WHERE id = %d",
+			$amid
+		) );
+
+		if ( ! $gbid ) {
+			return new WP_Error( 'not_found', 'Assignment not found.', array( 'status' => 404 ) );
+		}
+
+		// Non-admin users must be enrolled in the course.
+		if ( ! current_user_can( 'manage_options' ) ) {
+			$current_user = wp_get_current_user();
+			$enrolled     = $wpdb->get_var( $wpdb->prepare(
+				"SELECT COUNT(*) FROM {$table_gradebook} WHERE uid = %d AND gbid = %d",
+				$current_user->ID,
+				$gbid
+			) );
+
+			if ( ! $enrolled ) {
+				return new WP_Error( 'forbidden', 'You are not enrolled in this course.', array( 'status' => 403 ) );
+			}
+		}
+
 		$pie_chart_data = $wpdb->get_col( $wpdb->prepare(
 			"SELECT assign_points_earned FROM {$table_assignment} WHERE amid = %d",
 			$amid
