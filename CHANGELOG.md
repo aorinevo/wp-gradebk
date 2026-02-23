@@ -1,3 +1,10 @@
+# [6.4.0](https://github.com/aorinevo/wp-gradebk/compare/6.3.0...6.4.0) (2026-02-23)
+
+
+### Features
+
+* **framework:** replace backbonejs with react ([178553a](https://github.com/aorinevo/wp-gradebk/commit/178553a2e63f53c780b2d856b93fda816dd7aa9a))
+
 # [6.3.0](https://github.com/aorinevo/wp-gradebk/compare/6.2.0...6.3.0) (2026-02-22)
 
 
