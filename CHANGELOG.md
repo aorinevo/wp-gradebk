@@ -1,3 +1,10 @@
+# [6.5.0](https://github.com/aorinevo/wp-gradebk/compare/6.4.1...6.5.0) (2026-02-23)
+
+
+### Features
+
+* **framework:** add typescript, linting, kebab-case ([69dd22b](https://github.com/aorinevo/wp-gradebk/commit/69dd22b9ff0127e7b78ab9593732aa0520ec6317))
+
 ## [6.4.1](https://github.com/aorinevo/wp-gradebk/compare/6.4.0...6.4.1) (2026-02-23)
 
 
