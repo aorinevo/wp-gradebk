@@ -10,6 +10,7 @@
 Thumbs.db
 
 node_modules
+src
 package.json
 package-lock.json
 .releaserc.json
