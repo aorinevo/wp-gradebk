@@ -66,23 +66,12 @@ class AN_GradeBook_REST_Assignments {
 		}
 
 		$details = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table_assignments} WHERE id = %d", $assignID ), ARRAY_A );
-		$details['assign_order'] = intval( $details['assign_order'] );
-		$details['gbid']         = intval( $details['gbid'] );
-		$details['id']           = intval( $details['id'] );
 
 		$cells = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table_assignment} WHERE amid = %d", $assignID ), ARRAY_A );
-		foreach ( $cells as &$c ) {
-			$c['amid']                 = intval( $c['amid'] );
-			$c['uid']                  = intval( $c['uid'] );
-			$c['assign_order']         = intval( $c['assign_order'] );
-			$c['assign_points_earned'] = intval( $c['assign_points_earned'] );
-			$c['gbid']                 = intval( $c['gbid'] );
-			$c['id']                   = intval( $c['id'] );
-		}
 
 		return rest_ensure_response( array(
-			'assignmentDetails'  => $details,
-			'assignmentStudents' => $cells,
+			'assignmentDetails'  => $this->prepare_assignment( $details ),
+			'assignmentStudents' => array_map( array( $this, 'prepare_cell' ), $cells ),
 		) );
 	}
 
@@ -106,11 +95,8 @@ class AN_GradeBook_REST_Assignments {
 		), array( 'amid' => $id ) );
 
 		$details = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table_assignments} WHERE id = %d", $id ), ARRAY_A );
-		$details['id']           = intval( $details['id'] );
-		$details['gbid']         = intval( $details['gbid'] );
-		$details['assign_order'] = intval( $details['assign_order'] );
 
-		return rest_ensure_response( $details );
+		return rest_ensure_response( $this->prepare_assignment( $details ) );
 	}
 
 	public function delete_assignment( $request ) {
@@ -121,5 +107,29 @@ class AN_GradeBook_REST_Assignments {
 		$wpdb->delete( an_gradebook_table( 'an_assignments' ), array( 'id' => $id ) );
 
 		return rest_ensure_response( array( 'id' => $id ) );
+	}
+
+	private function prepare_assignment( $row ) {
+		return array(
+			'id'                => intval( $row['id'] ),
+			'gbid'              => intval( $row['gbid'] ),
+			'assign_order'      => intval( $row['assign_order'] ),
+			'assign_name'       => sanitize_text_field( $row['assign_name'] ),
+			'assign_category'   => sanitize_text_field( $row['assign_category'] ),
+			'assign_visibility' => sanitize_text_field( $row['assign_visibility'] ),
+			'assign_date'       => sanitize_text_field( $row['assign_date'] ),
+			'assign_due'        => sanitize_text_field( $row['assign_due'] ),
+		);
+	}
+
+	private function prepare_cell( $row ) {
+		return array(
+			'id'                   => intval( $row['id'] ),
+			'uid'                  => intval( $row['uid'] ),
+			'gbid'                 => intval( $row['gbid'] ),
+			'amid'                 => intval( $row['amid'] ),
+			'assign_order'         => intval( $row['assign_order'] ),
+			'assign_points_earned' => floatval( $row['assign_points_earned'] ),
+		);
 	}
 }

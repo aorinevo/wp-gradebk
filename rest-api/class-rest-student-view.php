@@ -51,7 +51,7 @@ class AN_GradeBook_REST_Student_View {
 			$gbids
 		), ARRAY_A );
 
-		return rest_ensure_response( $courses );
+		return rest_ensure_response( array_map( array( $this, 'prepare_course' ), $courses ) );
 	}
 
 	public function get_gradebook( $request ) {
@@ -80,24 +80,12 @@ class AN_GradeBook_REST_Student_View {
 			$gbid
 		), ARRAY_A );
 
-		foreach ( $assignments as &$assignment ) {
-			$assignment['id']           = intval( $assignment['id'] );
-			$assignment['gbid']         = intval( $assignment['gbid'] );
-			$assignment['assign_order'] = intval( $assignment['assign_order'] );
-		}
-
 		if ( empty( $assignments ) ) {
 			$student = get_userdata( $current_user->ID );
 			return rest_ensure_response( array(
 				'assignments' => array(),
 				'cells'       => array(),
-				'students'    => array(
-					'firstname'  => $student->first_name,
-					'lastname'   => $student->last_name,
-					'user_login' => $student->user_login,
-					'id'         => intval( $student->ID ),
-					'gbid'       => $gbid,
-				),
+				'students'    => $this->prepare_student( $student, $gbid ),
 			) );
 		}
 
@@ -111,33 +99,14 @@ class AN_GradeBook_REST_Student_View {
 			$query_args
 		), ARRAY_A );
 
-		foreach ( $student_assignments as &$sa ) {
-			$sa['gbid'] = intval( $sa['gbid'] );
-		}
-
 		$student = get_userdata( $current_user->ID );
-		$student_data = array(
-			'firstname'  => $student->first_name,
-			'lastname'   => $student->last_name,
-			'user_login' => $student->user_login,
-			'id'         => intval( $student->ID ),
-			'gbid'       => $gbid,
-		);
 
 		usort( $student_assignments, an_gradebook_build_sorter( 'assign_order' ) );
-		foreach ( $student_assignments as &$sa ) {
-			$sa['amid']                 = intval( $sa['amid'] );
-			$sa['uid']                  = intval( $sa['uid'] );
-			$sa['assign_order']         = intval( $sa['assign_order'] );
-			$sa['assign_points_earned'] = floatval( $sa['assign_points_earned'] );
-			$sa['gbid']                 = intval( $sa['gbid'] );
-			$sa['id']                   = intval( $sa['id'] );
-		}
 
 		return rest_ensure_response( array(
-			'assignments' => $assignments,
-			'cells'       => $student_assignments,
-			'students'    => $student_data,
+			'assignments' => array_map( array( $this, 'prepare_assignment' ), $assignments ),
+			'cells'       => array_map( array( $this, 'prepare_cell' ), $student_assignments ),
+			'students'    => $this->prepare_student( $student, $gbid ),
 		) );
 	}
 
@@ -192,8 +161,8 @@ class AN_GradeBook_REST_Student_View {
 					$count         = count( $all_scores );
 					$class_average = $count > 0 ? array_sum( $all_scores ) / $count : 0;
 					$grade         = array_merge( $grade, array(
-						'assign_name'   => $assignment['assign_name'],
-						'class_average' => $class_average,
+						'assign_name'   => sanitize_text_field( $assignment['assign_name'] ),
+						'class_average' => floatval( $class_average ),
 					) );
 				}
 			}
@@ -201,9 +170,57 @@ class AN_GradeBook_REST_Student_View {
 
 		$result = array( array( 'Assignment', 'Student Score', 'Class Average' ) );
 		foreach ( $student_grades as $grade ) {
-			$result[] = array( $grade['assign_name'], $grade['assign_points_earned'], $grade['class_average'] );
+			$result[] = array(
+				sanitize_text_field( $grade['assign_name'] ),
+				intval( $grade['assign_points_earned'] ),
+				floatval( $grade['class_average'] ),
+			);
 		}
 
 		return rest_ensure_response( $result );
+	}
+
+	private function prepare_course( $row ) {
+		return array(
+			'id'       => intval( $row['id'] ),
+			'name'     => sanitize_text_field( $row['name'] ),
+			'school'   => sanitize_text_field( $row['school'] ),
+			'semester' => sanitize_text_field( $row['semester'] ),
+			'year'     => intval( $row['year'] ),
+		);
+	}
+
+	private function prepare_assignment( $row ) {
+		return array(
+			'id'                => intval( $row['id'] ),
+			'gbid'              => intval( $row['gbid'] ),
+			'assign_order'      => intval( $row['assign_order'] ),
+			'assign_name'       => sanitize_text_field( $row['assign_name'] ),
+			'assign_category'   => sanitize_text_field( $row['assign_category'] ),
+			'assign_visibility' => sanitize_text_field( $row['assign_visibility'] ),
+			'assign_date'       => sanitize_text_field( $row['assign_date'] ),
+			'assign_due'        => sanitize_text_field( $row['assign_due'] ),
+		);
+	}
+
+	private function prepare_cell( $row ) {
+		return array(
+			'id'                   => intval( $row['id'] ),
+			'uid'                  => intval( $row['uid'] ),
+			'gbid'                 => intval( $row['gbid'] ),
+			'amid'                 => intval( $row['amid'] ),
+			'assign_order'         => intval( $row['assign_order'] ),
+			'assign_points_earned' => floatval( $row['assign_points_earned'] ),
+		);
+	}
+
+	private function prepare_student( $user, $gbid ) {
+		return array(
+			'firstname'  => sanitize_text_field( $user->first_name ),
+			'lastname'   => sanitize_text_field( $user->last_name ),
+			'user_login' => sanitize_text_field( $user->user_login ),
+			'id'         => intval( $user->ID ),
+			'gbid'       => intval( $gbid ),
+		);
 	}
 }
