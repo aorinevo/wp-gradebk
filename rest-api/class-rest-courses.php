@@ -51,8 +51,11 @@ class AN_GradeBook_REST_Courses {
 
 	public function get_courses() {
 		global $wpdb;
-		$table = an_gradebook_table( 'an_gradebooks' );
+		$table   = an_gradebook_table( 'an_gradebooks' );
 		$results = $wpdb->get_results( "SELECT * FROM {$table}", ARRAY_A );
+
+		$results = array_map( array( $this, 'prepare_course' ), $results );
+
 		return rest_ensure_response( $results );
 	}
 
@@ -72,7 +75,7 @@ class AN_GradeBook_REST_Courses {
 		}
 
 		$course = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table} WHERE id = %d", $wpdb->insert_id ), ARRAY_A );
-		return rest_ensure_response( $course );
+		return rest_ensure_response( $this->prepare_course( $course ) );
 	}
 
 	public function update_course( $request ) {
@@ -88,7 +91,7 @@ class AN_GradeBook_REST_Courses {
 		), array( 'id' => $id ) );
 
 		$course = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table} WHERE id = %d", $id ), ARRAY_A );
-		return rest_ensure_response( $course );
+		return rest_ensure_response( $this->prepare_course( $course ) );
 	}
 
 	public function delete_course( $request ) {
@@ -111,34 +114,17 @@ class AN_GradeBook_REST_Courses {
 		$table_gradebook   = an_gradebook_table( 'an_gradebook' );
 
 		$assignments = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table_assignments} WHERE gbid = %d", $gbid ), ARRAY_A );
-		foreach ( $assignments as &$a ) {
-			$a['id']           = intval( $a['id'] );
-			$a['gbid']         = intval( $a['gbid'] );
-			$a['assign_order'] = intval( $a['assign_order'] );
-		}
+		$assignments = array_map( array( $this, 'prepare_assignment' ), $assignments );
 
 		$cells = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table_assignment} WHERE gbid = %d", $gbid ), ARRAY_A );
 		usort( $cells, an_gradebook_build_sorter( 'assign_order' ) );
-		foreach ( $cells as &$c ) {
-			$c['amid']                 = intval( $c['amid'] );
-			$c['uid']                  = intval( $c['uid'] );
-			$c['assign_order']         = intval( $c['assign_order'] );
-			$c['assign_points_earned'] = floatval( $c['assign_points_earned'] );
-			$c['gbid']                 = intval( $c['gbid'] );
-			$c['id']                   = intval( $c['id'] );
-		}
+		$cells = array_map( array( $this, 'prepare_cell' ), $cells );
 
 		$student_rows = $wpdb->get_results( $wpdb->prepare( "SELECT uid FROM {$table_gradebook} WHERE gbid = %d", $gbid ), ARRAY_N );
 		$students     = array();
 		foreach ( $student_rows as $row ) {
 			$u          = get_userdata( $row[0] );
-			$students[] = array(
-				'firstname'  => $u->first_name,
-				'lastname'   => $u->last_name,
-				'user_login' => $u->user_login,
-				'id'         => intval( $u->ID ),
-				'gbid'       => $gbid,
-			);
+			$students[] = $this->prepare_student( $u, $gbid );
 		}
 
 		return rest_ensure_response( array(
@@ -167,7 +153,7 @@ class AN_GradeBook_REST_Courses {
 
 		$column_headers = array( 'firstname', 'lastname', 'user_login', 'id', 'gbid' );
 		foreach ( $assignments as $a ) {
-			$column_headers[] = $a['assign_name'];
+			$column_headers[] = sanitize_text_field( $a['assign_name'] );
 		}
 
 		$student_assignments = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$table_assignment} WHERE gbid = %d", $gbid ), ARRAY_A );
@@ -182,7 +168,7 @@ class AN_GradeBook_REST_Courses {
 		$student_records = array();
 		foreach ( $student_rows as $row ) {
 			$u    = get_userdata( $row[0] );
-			$base = array( $u->first_name, $u->last_name, $u->user_login, intval( $u->ID ), $gbid );
+			$base = array( sanitize_text_field( $u->first_name ), sanitize_text_field( $u->last_name ), sanitize_text_field( $u->user_login ), intval( $u->ID ), $gbid );
 			$scores = array_values( array_map(
 				function ( $sa ) { return $sa['assign_points_earned']; },
 				array_filter( $student_assignments, function ( $sa ) use ( $u ) { return $sa['uid'] === intval( $u->ID ); } )
@@ -202,6 +188,50 @@ class AN_GradeBook_REST_Courses {
 		}
 		fclose( $output );
 		exit;
+	}
+
+	private function prepare_course( $row ) {
+		return array(
+			'id'       => intval( $row['id'] ),
+			'name'     => sanitize_text_field( $row['name'] ),
+			'school'   => sanitize_text_field( $row['school'] ),
+			'semester' => sanitize_text_field( $row['semester'] ),
+			'year'     => intval( $row['year'] ),
+		);
+	}
+
+	private function prepare_assignment( $row ) {
+		return array(
+			'id'                => intval( $row['id'] ),
+			'gbid'              => intval( $row['gbid'] ),
+			'assign_order'      => intval( $row['assign_order'] ),
+			'assign_name'       => sanitize_text_field( $row['assign_name'] ),
+			'assign_category'   => sanitize_text_field( $row['assign_category'] ),
+			'assign_visibility' => sanitize_text_field( $row['assign_visibility'] ),
+			'assign_date'       => sanitize_text_field( $row['assign_date'] ),
+			'assign_due'        => sanitize_text_field( $row['assign_due'] ),
+		);
+	}
+
+	private function prepare_cell( $row ) {
+		return array(
+			'id'                   => intval( $row['id'] ),
+			'uid'                  => intval( $row['uid'] ),
+			'gbid'                 => intval( $row['gbid'] ),
+			'amid'                 => intval( $row['amid'] ),
+			'assign_order'         => intval( $row['assign_order'] ),
+			'assign_points_earned' => floatval( $row['assign_points_earned'] ),
+		);
+	}
+
+	private function prepare_student( $user, $gbid ) {
+		return array(
+			'firstname'  => sanitize_text_field( $user->first_name ),
+			'lastname'   => sanitize_text_field( $user->last_name ),
+			'user_login' => sanitize_text_field( $user->user_login ),
+			'id'         => intval( $user->ID ),
+			'gbid'       => intval( $gbid ),
+		);
 	}
 
 	private function sanitize_csv_value( $value ) {

@@ -71,7 +71,7 @@ class AN_GradeBook_REST_Stats {
 		$is_F = count( array_filter( $pie_chart_data, function ( $n ) { return $n < 60; } ) );
 
 		return rest_ensure_response( array(
-			'grades' => array( $is_A, $is_B, $is_C, $is_D, $is_F ),
+			'grades' => array( intval( $is_A ), intval( $is_B ), intval( $is_C ), intval( $is_D ), intval( $is_F ) ),
 		) );
 	}
 
@@ -106,8 +106,8 @@ class AN_GradeBook_REST_Stats {
 					$count         = count( $all_scores );
 					$class_average = $count > 0 ? array_sum( $all_scores ) / $count : 0;
 					$grade         = array_merge( $grade, array(
-						'assign_name'   => $assignment['assign_name'],
-						'class_average' => $class_average,
+						'assign_name'   => sanitize_text_field( $assignment['assign_name'] ),
+						'class_average' => floatval( $class_average ),
 					) );
 				}
 			}
@@ -115,7 +115,11 @@ class AN_GradeBook_REST_Stats {
 
 		$result = array( array( 'Assignment', 'Student Score', 'Class Average' ) );
 		foreach ( $student_grades as $grade ) {
-			$result[] = array( $grade['assign_name'], $grade['assign_points_earned'], $grade['class_average'] );
+			$result[] = array(
+				sanitize_text_field( $grade['assign_name'] ),
+				intval( $grade['assign_points_earned'] ),
+				floatval( $grade['class_average'] ),
+			);
 		}
 
 		return rest_ensure_response( $result );
