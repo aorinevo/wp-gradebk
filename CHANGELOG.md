@@ -1,3 +1,10 @@
+## [6.5.1](https://github.com/aorinevo/wp-gradebk/compare/6.5.0...6.5.1) (2026-02-27)
+
+
+### Bug Fixes
+
+* **security:** apply late escaping at REST API output points ([302df50](https://github.com/aorinevo/wp-gradebk/commit/302df505565234a352262a04205b4015bfa84783))
+
 # [6.5.0](https://github.com/aorinevo/wp-gradebk/compare/6.4.1...6.5.0) (2026-02-23)
 
 

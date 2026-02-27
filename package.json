@@ -1,6 +1,6 @@
 {
   "name": "an-gradebook",
-  "version": "6.5.0",
+  "version": "6.5.1",
   "private": true,
   "description": "A gradebook plugin for educators to create, maintain, and share grades.",
   "scripts": {
