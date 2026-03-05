@@ -1,3 +1,10 @@
+## [6.5.2](https://github.com/aorinevo/wp-gradebk/compare/6.5.1...6.5.2) (2026-03-05)
+
+
+### Bug Fixes
+
+* **vuls:** address early esc output ([8685654](https://github.com/aorinevo/wp-gradebk/commit/868565423f8fa5fb95985601baaf8644458c1f66))
+
 ## [6.5.1](https://github.com/aorinevo/wp-gradebk/compare/6.5.0...6.5.1) (2026-02-27)
 
 
