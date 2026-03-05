@@ -1,3 +1,10 @@
+## [6.5.3](https://github.com/aorinevo/wp-gradebk/compare/6.5.2...6.5.3) (2026-03-05)
+
+
+### Bug Fixes
+
+* **ci/cd:** version input on deploy workflow ([44afbcc](https://github.com/aorinevo/wp-gradebk/commit/44afbccecb53d750ecc54ffc1b85b85588260bc8))
+
 ## [6.5.2](https://github.com/aorinevo/wp-gradebk/compare/6.5.1...6.5.2) (2026-03-05)
 
 
