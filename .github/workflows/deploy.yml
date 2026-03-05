@@ -10,6 +10,9 @@ on:
       confirm:
         description: 'Type "deploy" to confirm'
         required: true
+      version:
+        description: 'Version to deploy (e.g., 6.5.1). Required for manual dispatch.'
+        required: true
 
 permissions:
   contents: write
@@ -71,6 +74,7 @@ jobs:
           SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
           SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
           SLUG: an-gradebook
+          VERSION: ${{ github.event.inputs.version || github.ref_name }}
 
       - name: Upload ZIP to GitHub Release
         if: github.event_name == 'push'
