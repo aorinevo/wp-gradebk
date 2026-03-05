@@ -96,9 +96,9 @@ function enqueue_an_gradebook_scripts( $hook ) {
 	}
 
 	wp_localize_script( 'an-gradebook-react', 'anGradebookSettings', array(
-		'restNonce' => wp_create_nonce( 'wp_rest' ),
-		'restUrl'   => rest_url( 'an-gradebook/v1/' ),
-		'userRole'  => current_user_can( 'manage_options' ) ? 'instructor' : 'student',
+		'restNonce' => esc_attr( wp_create_nonce( 'wp_rest' ) ),
+		'restUrl'   => esc_url( rest_url( 'an-gradebook/v1/' ) ),
+		'userRole'  => esc_attr(current_user_can( 'manage_options' )) ? 'instructor' : 'student',
 	) );
 }
 add_action( 'admin_enqueue_scripts', 'enqueue_an_gradebook_scripts' );
